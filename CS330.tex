@@ -14,6 +14,7 @@
     \usepackage{listings}
     \usepackage{color}
     \usepackage{hyperref}
+    \usepackage{amssymb}
     
     \usepackage{auto-pst-pdf}
     \usepackage{pst-all}
@@ -78,9 +79,87 @@
 \tableofcontents
 \newpage
 \section{Matching}
+
+\newpage
 \section{Lineær Programmering}
-\subsection{Komplimentær slakkhet}
+Dette er kanskje det viktigste konseptet i faget, og grunnlaget for omtrent hele første halvdel av pensum. Lineære programmer er en veldig generell måte å modellere/sette opp optimaliseringsproblemer over $\mathbb{Q}^n$, der løsningen består av å optimalisere en lineær målfunksjon, samtidig som vi holder oss innen lineære restriksjoner. Lineær program har en veldig visuel løsningsform, der restriksjonene tilsammen lager en (konveks) polytop av gyldige løsninger, og målfunksjonen bestemmer retningen hvor den optimale løsningen ligger. Dessverre så kan også restriksjonene være umulige, eller ubegrenset. Men dersom det ikke gjelder, kan vi generelt finne den optimale løsningen i polynomisk tid!
+
+\subsection{Kanonisk Form}
+
+Generelt ser den kanoniske formen på lineær program slik ut:
+
+\begin{equation*}\label{maxindependentset}
+\begin{array}{ll@{}ll}
+\text{Maximize: }  & \boldsymbol{c}^T &\boldsymbol{x}&\\
+\text{subject to:}& A&\boldsymbol{x} \leq \boldsymbol{b}\\
+&&x_i \geq 0&\forall x_i \in \boldsymbol{x}
+\end{array}
+\end{equation*}
+
+Her er $A$ en matrise, mens $w,x,b$ er vektorer. Grunnen til at en slik "kanonisk form" er mulig er ganske enkelt fordi alle lineærprogram kan omformuleres til denne formen. Det gjøres slik: $min(cx) = max(-cx), x \geq b \iff -x \leq b, x = b \iff x \leq b \wedge x \geq b$. Merk at både gjennom boka og kompendiet så brukes $min,max$ om hverandre (begge er definert som kanonisk form). Dette fordi at enkelte problem er naturlig å tenke på som maksimeringsproblemer, mens andre er mer naturlig å tenke på som minimeringsproblemer. Uansett, det er ønskelig å få alle ulikhetene samme vei for restriksjonene, så dette gjøres stort sett også.
+
+\subsection{Heltallsprogram}
+Veldig mange praktiske (og teoretiske) problemer har en form for heltallighet som krav. Hvis $\boldsymbol{x}$ representerer antal av forskjellige komponenter i en optimal løsning, er det naturlig å tenke seg at alle $x_i \in \boldsymbol{x}$ må være heltallige, avhengig av optimaliseringsproblemet (hvis $\boldsymbol{x}$ representerer mennesker fra forskjellige grupper f.eks. så er det jo uheldig å få en fraksjonell løsning). Dermed kan dette være en naturlig restriksjon på lineærprogrammet vårt. Da ender vi opp med det som kalles et heltallsprogram. Fra nå av bruker vi IP og LP (IP = Integer Program, LP = Linear Program). En annen variant av IP kan modelers som at $x_i \in \{0,1\}$. Dette gir en veldig naturlig måte å formulere "decision"-type problemer, der $0,1$ representerer valg (typisk ta med i løsningen eller ikke). Som vi vet er slike "decision"-problemer veldig ofte NP-harde, noe som betyr at det å løse et IP er generelt NP-hardt også.
+
+Likevel så er det flere ting vi kan gjøre for å jobbe rundt dette, og heltallsprogram er den absolutt sentrale delen av pensum, og helt håpløst er det ikke. For det første har enkelte lineær-program har alltid heltallige løsninger (selvom det ikke har heltallskrav), og for det andre kan ofte løsningen på slakkingen av IPet fortelle oss noe om løsningen (hvis vi klarer å argumentere for en øvre grense på forskjellen mellom løsningen på IPet og det tilhørende LPet). En slakking av et heltallsprogram er når vi fjerner heltallskravet og ender opp med et tilhørende lineærprogram.
+
+\subsection{Dualitet}
+Også et utrolig viktig konsept som går igjen i første halvdel av pensum (mantraen er generelt lineærprogram++ går igjen i første halvdel...). For ethvert lineærprogram, kan vi enkelt konstruere det såkalte "duale" lineærprogrammet. Dette omtales som DUALEN, mens det originale lineærprogrammet da omtales som PRIMALEN. Vi lager dualen ved å sette en variabel for hver restriksjon i primalen, og en restriksjon i dualen for hver variabel i primalen. En intuitiv forståelse av dualen er litt vanskelig å skrive ned, men det kommer når det jobbes med. Det som er målet er å finne en øvre grense for den optimale løsningen for primalen, og det viser seg at denne øvre grensen også er et lineær program. Dualen til den kanoniske formen nevnt tidligere ser slik ut, og forsøker å skvise en øvre grense så nært som mulig:
+
+\begin{equation*}\label{maxindependentset}
+\begin{array}{ll@{}ll}
+\text{Mimimize: }  & \boldsymbol{b}^T &\boldsymbol{y}&\\
+\text{subject to:}& A^T&\boldsymbol{y} \geq \boldsymbol{c}\\
+&&y_i \geq 0&\forall y_i \in \boldsymbol{y}
+\end{array}
+\end{equation*}
+
+Hadde vi tatt dualen av dette lineær-programmet igjen, hadde vi endt opp med den kanoniske formen vi starta med. Dette er generelt også alltid sant (Dualen til DUALEN er igjen PRIMALEN). 
+
+For gyldige løsninger på primalen og dualen kan vi generelt skrive følgnde ulikheter
+
+\begin{equation*}\label{maxindependentset}
+\begin{array}{ll@{}ll}
+\text{Primal: }  & &A\boldsymbol{x} \leq \boldsymbol{b}&\\
+\text{Dual:}& \boldsymbol{c} \leq \boldsymbol{y}&A\\
+x,y \geq 0 &\boldsymbol{c}\boldsymbol{x} \leq \boldsymbol{y}&A\boldsymbol{x} \leq \boldsymbol{y}\boldsymbol{b}&\\
+\text{Ved optimum (!):}&\boldsymbol{c}\boldsymbol{x} = \boldsymbol{y}&A\boldsymbol{x} = \boldsymbol{y}\boldsymbol{b}&\\
+\end{array}
+\end{equation*}
+Den nest nederste kalles ulikheten kalles svak dualitet, mens den nederste likheten kalles sterk dualitet. Beviset for sterk dualitet kan sees i boken.
+
+Dette gjelder naturlig nok kun når både primalen og dualen er endelig optimale (det holder å vise at en av dem er det, for da må også den andre være det). Generelt finnes det 4 tilfeller, som jeg lister raskt opp nå; 1) PRIM endelig optimal, DUAL endelig optimal, 2) PRIM ubegrenset, DUAL umulig, 3) PRIM umulig, DUAL ubegrenset, 4) begge umulig. 
+
+\subsection{Komplementær slakkhet}
+Et viktig teorem, basis for primal-dual metoden som det står skrevet om litt lenger nede. Komplementær slakkhet er følgende "betingelse" for et PRIMAL/DUAL par:
+
+\begin{equation*}\label{maxindependentset}
+\begin{array}{ll@{}ll}
+y_i = 0 \Longleftarrow (Ax)_i \neq b_i & \forall i\\
+x_j = 0 \Longleftarrow (yA)_j \neq c_j & \forall j\\
+\end{array}
+\end{equation*}
+
+Det er lett å se at komplementær slakkhet impliserer likhet mellom målfunksjonene (at det er en tilstrekkelig betingelse for likhet). Men at kanskje noe mer overraskende resultat er at komplimentær slakkhet også er nødvendig for å oppnå likhet! Dvs. likhet mellom målfunksjonene impliserer komplimentær slakkhet. Her er et pent bevis:
+
+Se for oss at vi har likhet mellom målfunksjonene, altså $\boldsymbol{c}\boldsymbol{x} = \boldsymbol{y}A\boldsymbol{x} = \boldsymbol{y}\boldsymbol{b}$. Den siste halvdelen kan vi skrive om som $\boldsymbol{y}(\boldsymbol{b}-A\boldsymbol{x}) = 0$, og vi vet at $\boldsymbol{b}-A\boldsymbol{x} \geq 0$, siden restriksjonen var at $A\boldsymbol{x} \leq \boldsymbol{b}$. Dette gir oss følgende:
+
+\begin{equation*}\label{maxindependentset}
+\begin{array}{ll@{}ll}
+\boldsymbol{y}(A\boldsymbol{x}-\boldsymbol{b}) = &\sum\limits_{i=1}^{n}y_i(Ax-b)_i = 0\\
+& (Ax-b)_i \geq 0 & \forall i \in \{1,..,m\}\\
+& y_i \geq 0 & \forall i \in \{1,..,m\}
+\end{array}
+\end{equation*}
+
+og det er helt tydelig at vi må ha komplimentær slakkhet (dette viser strengt tatt bare komplimentær slakkhet den ene veien, men et helt symmetrisk argument gir beviset andre veien og).
+
+\newpage
+
 \section{Den ungarske metoden}
+
+\newpage
+
 \section{Approksimasjon}
 \label{sec:approx}
 
