@@ -79,6 +79,22 @@
 \tableofcontents
 \newpage
 \section{Matching}
+Matching er et ganske greit problem, men som går igjen mye på starten og i eksempler av forskjellige konsepter, så greit å ha god kontroll på det. Generelt så er det et av de få graf-optimaliseringsprobleme som kan løses i polynomisk tid. Problemet er formulert som følger: Gitt en graf $G = (V,E)$, finn en $M \subseteq E$ slik at grafen $G' = (V,M)$ ikke inneholder noen noder av grad $> 1$. Det finnes fire forskjellige tilfeller, som alle kan sees på som ganske forskjellige problemer. De kommer av hvorvidt grafen er bipartitt og/eller vektet. 
+
+Trolig det viktigste konseptet for å oppnå optimale løsninger på matching-problemer er forøkende stier. Først må vi ha litt terminologi: En maksimal løsning er en ikke-utvidbare løsning. Et maksimum er den optimale løsningen. Åpenbart er et maksimum også en maksimal løsning. En forøkene sti er en sti der kantene veksler mellom å være kanter som er med i en matching, og ikke med i en matching. Dersom en slik sti starter å slutter i noder som ikke er med i matchingen, så er den forøkende. For å se dette, bare "flip" alle kantene i stien (fjern de som er med i matchingen, legg til de som ikke er det). Dette vil naturligvis øke matchingen med 1 kant (husk at stien startet og sluttet i noder som ikke var med i matchingen).
+
+Det kanskje første teoremet i algkons er da at en løsning er et globalt maksimum hvis og bare hvis det ikke finnes noen forøkende stier. Ganske åpenbart den ene veien, men litt mer overraskende at ingen forøkende stier er et tilstrekkelig krav for å oppnå globalt maksimum. For å se dette, si at vi har en graf med en matching $M$ uten noen forøkende stier. I tillegg antar vi at det finnes en $M'$ slik at $|M'| > |M|$. Dersom vi da ser på grafen der kantene er i $M \oplus M'$, kan vi si et par ting om alle stiene. Her må naturlig nok alle stier alternere mellom $M \text{ og } M'$. Dermed finnes det ingen odde sykler. Videre, siden  $|M'| > |M|$ må det finnes minst en vei som både starter og slutter i $M'$. Dette vil da være en alternerende sti i $G = (V,M)$, så vi har oppnådd en kontradiksjon. Dermed kan vi naturlig nok generelt basere uvektet matching algoritmer på slike forøkende stier (detaljer i boka).
+
+\subsection{Bipartitt Matching}
+Når grafen er bipartitt ($G = (U \cap V, E)$) blir matching problemet noe "enklere". Men, i flere virkelighetstilfeller modellerer vi faktisk bipartitt matching, og ikke bare matching (typiske "assignement" problemer). Naturlig nok kan vi her også basere løsninger på forøkende stier, og det gir også opphav til et nytt teorem. Først, for å se hvordan man lager en slik forøkende sti i en bipartitt graf, start me en hvilken som helst umatchet node i $U$. Stien vil naturligvis alternere mellom $U$ og $V$, og må også ende i $V$ for å være forøkende. Dette gir oss da \textbf{Hall's Marriage Theorem}, som forteller oss at en bipartitt graf $G = (U \cap V, E)$ har en perfekt matching hvis og bare hvis $|S| \leq |N(S)|, \forall S \subseteq U$, der en perfekt matching er en mathing der alle noder har grad nøyaktig lik $1$, og $N(S) = \{u \in V : (u,v) \in E, v \in S\}$ (eller sagt med ord, "naboene" til nodene $v \in S$). Dette er åpenbart nødvendig (ellers ville det ikke eksistert nok noder i $N(S)$ til å matche alle nodene i $S \subseteq U$), men det er også tilstrekkelig. For å se dette, la oss si at vi har en udekt node $u \in U$ (ikke perfekt altså), og at det ikke eksisterer noen forøkende stier (løsningen er med andre ord globalt maksimum). For at dette skal stemme må da $S \setminus \{u\}$ være matchet med $T$, og vi har $|T| = |N(S)| = |S| - 1 \iff |S| > |N(S)|$.
+
+For uvektet bipartitt matching er altså disse forøkende stiene den naturlige måten å optimere problemet på. Videre finnes det et par andre smarte ting å gjøre, f.eks. Hopcroft-Karp som istedenfor å finne en og en forøkende sti finner den alle disjunkte forøkende stier. Dette forbedrer kjøretiden fra $\mathcal{O}(nm)$ til $\mathcal{O}(\sqrt{n}m)$. Andre varianter er å legge til en kilde og et sluk på hver "side" av den bipartitte grafen, og løse med maks flyt.
+
+\subsection{Vektet Bipartitt Matching}
+Dette løses med den ungarske metoden (se kapittel \ref{ungarn}). Men det gis en liten teaser til tema om grådighet i forelesning 1, så jeg legger det ved her og. En helt naiv grådig løsning, alltid velge den tyngste/letteste (avhengig av om det er et maksimerings eller minimeringsproblem) kanten som er lovlig, gir en $2$-approksimasjon, ettersom optimeringsproblemet bipartitt matching er snittet av to transversalmatroider. Les videre for å forstå hva den setningen betyr... (Det viser seg faktisk at en grådig løsning gir en $2$-approksimasjon i det generelle, ikke-bipartitte tilfelle også).
+\subsection{Vektet (Ikke-Bipartitt) Matching}
+Løses gjerne med Lineær Programmering. Se neste seksjon.
+
 
 \newpage
 \section{Lineær Programmering}
@@ -156,7 +172,7 @@ og det er helt tydelig at vi må ha komplimentær slakkhet (dette viser strengt 
 
 \newpage
 
-\section{Den ungarske metoden}
+\section{Den ungarske metoden} \label{ungarn}
 
 \newpage
 
@@ -300,51 +316,5 @@ Her er $s_i$ og $v_i$ hhv. vekten og verdien til objektet $i \in I$. Dette oppse
 I vårt nåværende oppsett kan man gi problemet $I = \{1,2\}$, hvor $v_1 = D-1, v_2 = D, s_1 = 0, s_2 = 1$. Her er det lett og se at heltallsløsningen er å kun ta med objekt $2$, og gir oss summen $1$, mens LP-relakseringen vil ta med objekt $1$, og fylle opp siste lille biten med en fraksjon av objekt $2$. Dette gir summen $\frac{1}{D}$, og gir oss heltallsavvik $\frac{OPT}{PRIM} = D$.
 
 Det er en annen lur måte å sette opp problemet på som unngår det skrekkelige heltallsavviket ved å bytte ut verdi-begrepet med "avstand" fra å fylle opp til kravet D, og gir opphav til en $2$-approksimering. Se boka (s. 127)/forelesning 5 for detaljer.
-\newpage
-\newpage
-%% EXAMPLE ALGORITHM
-\begin{lstlisting}[language=python]
-import numpy as np
-from keras.models import Sequential
-from keras.layers.core import Dense, Dropout, Layer, Activation
-import time
-import tensorflow as tf
-
-f = open("results.csv", "w")
-
-
-INPUT_SIZE = 10
-OUTPUT_SIZE = INPUT_SIZE
-nb_class = 3
-
-batch_size = 128
-nb_epoch = 40
-
-np.random.seed(123)
-
-X_train = np.random.rand(INPUT_SIZE, nb_class)
-Y_train = np.random.rand(OUTPUT_SIZE, nb_class)
-
-X_test = np.random.rand(INPUT_SIZE)
-Y_test = np.random.rand(OUTPUT_SIZE)
-
-for i in range(1,51):
-
-    start_time = time.time()
-
-    model = Sequential()
-    model.add(Dense(INPUT_SIZE, input_shape=(nb_class,)))
-    model.add(Activation('linear'))
-    model.add(Dense(OUTPUT_SIZE))
-    model.add(Activation('linear'))
-    model.compile(loss='categorical_crossentropy', optimizer='rmsprop')
-
-    final_time = time.time()
-    diff_time = final_time - start_time
-
-    f.write(str(i)+","+str(diff_time)+","+"\n")
-
-f.close() 
-\end{lstlisting}
 
 \end{document}
