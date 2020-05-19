@@ -47,35 +47,13 @@
        tabsize=2
     }
     \lstset{style=mystyle}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% }
 
-%%%%%%%%%%%%%%%%%%%%%%%% CHANGE HERE %%%%%%%%%%%%%%%%%%%% 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% {
-\newcommand\course{CS 330-001}
-\newcommand\courseName{Introduction to Operating Systems}
-\newcommand\semester{Winter 2020}
-\newcommand\assignmentNumber{1}                             % <-- ASSIGNMENT #
-\newcommand\studentName{Your Name}                  % <-- YOUR NAME
-\newcommand\studentEmail{email@uregina.ca}          % <-- YOUR NAME
-\newcommand\studentNumber{200XXYYZZ}                % <-- STUDENT ID #
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% }
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-%%%%%%%%%%%%%%%%% DO NOT CHANGE HERE %%%%%%%%%%%%%%%%%%%% 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%{
 
 
     \firstpageno{1}
     
     \begin{document}
-    
-    \title{AlgKons(entrert) Kompendium}
 
-    \maketitle
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% }
 \tableofcontents
 \newpage
 \section{Matching}
@@ -405,6 +383,56 @@ Et annet eksempel er spenntrær i en rettet graf. Det kan modelleres som snittet
 
 \subsection{"Greedoids"}
 Helt til slutt kan det nevnes at kravet om inklusjon i uavhengige mengdesystemer faktisk er litt for strengt i forhold til hva som trengs for å kunne løse et optimaliseringsproblem med den grådige algoritmen. Dermed kan vi bytte ut det kravet heller med kravet at dersom $A \in \boldsymbol{S}$, så finnes det alltid en $e \in A \text{ slik at } A \setminus \{e\} \in \boldsymbol{S}$. Legg merke til at dette kravet, kalt tilgjengelighet, er mye mindre strengt enn kravet om inklusjon. Et slikt tilgjengelig system er en "greedoid" (en generalisering av matroide) hvis og bare hvis kravet for matroider i uavhengige mengdesystemer "for alle $J,K \in \boldsymbol{S}$ med $|J| = |K| + 1$ har vi at det eksisterer en $a \in J\setminus K$, slik at $K \cup \{a\} \in \boldsymbol{S}$" utvides til at også $J \setminus \{a\} \in \boldsymbol{S}$ (i uavhengige mengdesystemer var dette ikke et nødvendig krav, siden for alle $A \subseteq J \text{ hadde vi } A \in \boldsymbol{S}$). Legg også merke til at $\emptyset \in \boldsymbol{S}$ for alle tilgjengelige systemer så vel som alle uavhengige mengdesystemer.
+
+\section{Flyt}
+Flyt brukes mye i modellering, og har vist seg å være en av de viktigste teori-områdene for å modellere praktiske problemer. Vi starter med litt bakgrunn som vanlig, og så ser vi på litt praktiske problemer som kan løses ved flyt. Flyt burde være litt kjent fra algdat. Videre har vi alt sett at flyt som et lineærprogram har tilhørende dual minste s-t kutt.
+
+\subsection{Bakgrunn}
+
+Et flytnettverk er en graf $G = (V,A)$, med kapasiteteter på kantene $u(i,j)$, samt to markerte noder $s,t \in V$, en kilde $s$ og et sluk $t$. Videre må flyten følge to krav, nemlig kravet "capacity constraint", at $\forall (i,j) \in A, 0 \leq f(i,j) \leq u(i,j)$, samt kravet "flow conservation", at $\forall i \neq s,t, \sum\nolimits_{k:(i,k)\in A}f(i,k) = \sum\nolimits_{k:(k,i)\in A}f(k,i)$. Verdien på flyten $|f|$ er da $|f| = \sum\nolimits_{k:(s,k) \in A} f(s,k) - \sum\nolimits_{k:(k,s) \in A} f(k,s)$ (flyt ut av kilden minus flyt inn til kilden), eller ekvivalent (pga. flow conservation) $\sum\nolimits_{k:(k,t) \in A} f(k,t)$. Målet er da generelt å finne størst mulig $|f|$.
+
+Mye av den teoretisk analysen baserer seg på såkalt "skew symmetry", hvor vi $\forall (i,j) \in A$ setter $f(j,i) = -f(i,j), u(j,i) = 0$. Det er lett å se at vi fremdeles opprettholder kravene om flyt når vi legger på skew symmetry. Faktisk kan vi nå sette definere flow conservation enda enklere som $\forall i \neq s,t, \sum\nolimits_{k:(i,k)\in A}f(i,k) = 0$. Tilsvarende setter vi $|f| = \sum\nolimits_{k:(s,k) \in A}f(s,k)$.
+
+Vi har tidligere vært innom notasjonen $\delta (S)$ for et s-t kutt $S$. Som nevnt er minste mulige $\delta (S)$ dualen til lineærprogrammet for flytnettverk, og dermed får vi med en gang at $|f| = min_S \delta (S)$. Det kan også vises direkte uten kunnskap om lineærprogram ganske greit, se forelesning eller boka. Det direkte beviset viser i første omgang at $|f| \leq \delta (S), \forall S$. For likhet må vi ha et konsept om Residual grafen. Den er definert for en flyt $f$ på en graf $G = (V,A)$ med kapasiteter $u(i,j)$ som $G_f = (V,A)$, der $u_f(i,j) = u(i,j) - f(i,j)$. Dersom det finnes en path $P$ på $G_f$ fra $s$ til $t$ kalles dette en augmenting path, og eksistensen av en slik $P$ impliserer at $|f|$ ikke er maksimal (fordi vi kan da dytte $min_{(i,j) \in P} u_f(i,j)$ enheter langs $P$). Med denne forkunskapen kan vi bevise at følgende uttrykk er ekvivalente:
+
+\begin{itemize}
+  \item $f$ er en maksimal flyt
+  \item Det finnes ingen augmenting path $P$ i $G_f$
+  \item $|f| = u(\delta (S))$ for et min. s-t kutt $S$
+\end{itemize}
+
+Bevisene her er ikke så ille, se evt. boka/forelesning. En til egenskap som er viktig å nevne er heltalls-egenskapen ved flyt, som sier at dersom alle kapasiteter $u(i,j)$ er heltallige, vil også den maksimale $f$ være heltallig. Dette er kjempenyttig, siden da holder det alltid å vise at en ikke-heltallig $f'$ eksisterer, og dermed eksisterer en heltallig $f$ med $|f| \geq |f'|$. Dette er ikke en veldig vanskelig egenskap å se, kan f.eks vises ved å finne den maksimale $f$ ved å kun bruke augmenting paths (disse må jo alltid være heltallige).
+
+\subsection{Praktiske eksempler}
+Vi ser raskt (litt slurvete) på tre praktiske problemer som kan modelleres med flyt, og håper at disse inspirerer til å løse lignende oppgaver på eksamen.
+
+\subsubsection{Carpool Driver}
+Over en periode på $n$ dager skal $m$ forskjellige mennesker sette opp en carpool-kalender. Hver av dagene er $k$ folk med i bilen. Tanken er da at disse er ansvarlige for å kjøre $\frac{1}{k}$-del av bilen. La $r_i$ være det totale ansvaret person $i$ fått på seg. Målet er at person $i$ skal maks måtte kjøre $\lceil r_i \rceil$ ganger. Løses ved å sette opp en rad med noder for alle personene, og kanter fra $s$ til person $i$ med kapasitet $\lceil r_i \rceil$. Videre, sett opp en rad med noder for alle dagene, og en kant fra hver person til de dagene den personen skal sitte i bilen med ubegrenset kapasitet. Tilslutt sett kanter fra dagene til $t$ med kapasitet 1.
+
+En liten sidenote her er at dette alltid er løslig, siden det er helt trivielt løslig fraksjonelt, og pga. heltallsegenskapen (ubegrenset kapasitet kan bestemmes å være heltallig) får vi at dette er heltallig-løslig.
+
+\subsubsection{Baseball Elimination Problem}
+Litt mye notasjon å skrive opp her som kun er relevant for akkurat dette problemet, så outliner det heller litt grovt, og overlater beviser til boka. Vi ønsker å "eliminere" lag fra en baseball-liga (eliminere betyr i denne settingen at de ikke lenger kan vinne), og setter det opp ved å lage et flytnetthverk for hvert lag $k$ vi ønsker å skjekke om er eliminert. Det kan gjøres ved å sette en rad med noder som representerer alle de forskjellige parene av lag i ligaen utenom $k$, og en kant fra $s$ til disse med kapasitet "gjenværende kamper mellom disse to". Deretter en kant fra dette paret til hvert av lagene i paret med uendelig kapasitet. Til sist, en kant fra alle lag $i$ til $t$ med kapasitet "antall mulige poeng for $k$ (seiere + gjenværende spill) minus seiere for lag $i$". Dersom $\{s\}$ nå er et min s-t kutt, er ikke laget eliminert. En grei intuisjon for dette er at vi klarer å dytte en flyt tilsvarende gjenstående kamper mellom alle andre lag enn $k$ gjennom nettverket uten at noen får flere seiere enn $k$ teoretisk kan få.
+
+\subsubsection{Maximum Density Subgraph}
+Ganske generelt graf-problem, gitt en graf $G = (V,E)$, finn det settet $S \subseteq V$ slik at grafen indusert av $S$, $G(S) = (V,E(S))$ har høyest mulig "tetthet", $D = \frac{|E(S)|}{|S|}$. Det nøyaktige oppsettet her leder til litt knotete notasjon og en del bokføring for bevis av korrekthet osv., så hopper greit over det, kan evt. se i boken/forelesning. Men heller er det kule konseptet her idéen om å bruke maks-flyt + binærsøk for å finne svaret, når maks-flyt modellen kan brukes som et orakel for å skjekke om en parameter er en gyldig løsning. Litt mer formelt, om $D^*$ er den maksimale tettheten, vet vi at $D^*$ er i intervallet $[0,m], m = |E(S)|$. Deretter kan sette $\gamma = \frac{(l + u)}{2}$, der $l,u$ betegner nedre og øvre grense i intervallet, og benytte maks-flyt oppsettet vårt til å skjekke om $\gamma$ er lavere enn den maksimale tettheten. Hvis den er lavere blir det nye intervallet $[\gamma,u]$, ellers blir det $[l,\gamma]$. Deretter, siden $D^*$ er rasjonal, med begrenset størrelse på nevneren (maksimal størrelse er jo $n = |V|$), vet vi at ved å utføre binærsøket et endelig antall ganger ($\mathcal{O}(log(n))$) har vi begrenset intervallet til kun ett mulig tilfelle.
+
+\subsubsection{Project Planning}
+Oppgaven er tatt fra øving 4. Her har vi tre prosjekter, P1, P2 og P3 som krever så så mange "arbeidsmåneder" å fullføre, og som bare kan utføres under visse måneder, 4 måneder å utføre dem på og 8 arbeidere. Videre kan kun 6 arbeidere jobbe på hvert prosjekt pr. måned. Vi setter ganske greit opp problemet ved å ha kanter fra $s$ til arbeiderne med uendelig kapasitet. Deretter en kant fra arbeiderne til hver måned med kapasitet 1. Så en kant fra hver måned til hvert prosjekt, tilsvarende de månedene prosjektene kan utføres på, alle med kapasitet 6. Til slutt en kant fra alle prosjektene til $t$ med kapasitet tilsvarende antall arbeidsmåneder det krever å fullføre prosjektet.
+
+\subsubsection{k-Orientering}
+Tatt fra konteksamen 2018. Oppgaven lyder som følger "En orientering av en urettet graf $G=(V,E)$ er en tilordning av retning til hver kant $e \in E$, som resulterer i en ny rettet graf $D = (V,A)$, der hver urettet kant
+$(u,v) \in E$ tilsvarer en rettet kant enten $(u,v) \in A$ eller $(v,u) \in A$. Videre er en $k$-orientering en orientering der hver node $v$ har maksimalt $k(v)$ inn-kanter, for en funksjon $k:V \longrightarrow \mathbb{N}$. Hvordan kan du effektivt finne en $k$-orientering v.hj.a. maks flyt?".
+
+Dette løses ganske greit ved å sette opp en rad med noder for hver kant $e \in E$, og en kant fra $s$ til denne raden med kapasitet 1. Deretter sett opp en rad med noder for hver node $v \in V$, og legg til en kant mellom disse radene slik at hver kant kobles med sine ende-punkter i $G$. Disse kantene kan ha kapistet 1 (eller uendelig, spiller ingen rolle). Til slutt sett opp en kant fra hver node $v$ til $t$ med kapasitet $k(v)$.
+
+\subsection{Most improving / Shortest Augmenting Path}
+Så langt har vi jo faktisk ikke gått veldig inn på noen algoritme for å løse flyt-problemet, selvom vi i introduksjonen hintet litt til å bruke disse augmenting path'ene. Problemet her er at ved å ta en tilfeldig augmenting path, får vi ikke en polynomisk kjøretid. Hver augmenting path øker flyten med minimum 1, så vi trenger maksimalt $\mathcal{O}(mU)$ slike paths, hvor $U = max(u(i,j))$. En kjøretid på $\mathcal{O}(mU)$ er kun \textbf{pseudo-polynomisk}, siden numerisk data, i dette tilfelle $u(i,j)$, er som regel inputtet i binær. Med andre ord trenger vi $log(U)$ bits for å inpute $U$, og kjøretiden blir dermed eksponensiell. Vi viser straks en algoritme som har polynomisk kjøretid. Videre er det mulig å oppnå det som kalles \textbf{Strongly polynomial}, dvs. at kjøretiden kun er avhengig av antall elementer i inputen, og ikke størrelsen av dem (vi ser på det og).
+
+En naturlig idé er å finne den mest forbedrene ("most improving") augmenting pathen i $G_f$. For å analysere en slik algoritme, bruker vi veldig grei teori om flyt-dekomponering, $f = f' + f''$. Det er lett å bevise at summen av to flyt $f' og f''$ blir en ny flyt som overholder både capacity constraint og flow conservation, og at $|f| = |f'| + |f''|$. Se boka/forelesning for detaljer. Videre har vi at viktig lemma som sier at for enhver s-t flyt $f$ så finnes det flyter $f_1, f_2,...,f_l, l\leq m$ slik at $f = \sum\limits_{i=1}^{l}f_i$, hvor for alle $i$, har vi at de kantene med positiv flyt i $f_i$ enten danner en s-t path eller en sykel. Dette lemma kan vises med induksjon. Videre følger ganske naturlig gitt en maksimal flyt $f^*$ og en hvilken som helst s-t flyt $f$, så har den maksimal flyten i $G_f$ verdi $|f^*| - |f|$, og videre fra det første lemma kan denne maks-flyten i $G_f$ bygges av augmenting paths, der den most improving augmenting pathen har verdi minst $\frac{1}{m}(|f^*|-|f|)$. Dermed ved å alltid velge den "most improving" får vi etter k iterasjoner $|f^*| - |f|^{(k)} \leq (1-\frac{1}{m})^k(|f^*|-|f|)$, som etter $k = mlog(mU)$ vil gi oss maks flyten, altså har vi en polynomisk kjøretid (f.eks. gitt en ganske naiv most improving path algoritme med $\mathcal{O}(m^2)$ kjøretid, oppnår vi en total kjøretid på $\mathcal{O}(m^3log(mU)$. Denne kan forbedres litt ved enten en bedre "most improving" algoritme, eller å istedenfor å alltid finne den most improving augmenting path'en, nøyer vi oss med en path som er "bra nok", eller som har verdi mer enn $\Delta$.
+
+Som lovt er det og mulig å oppnå en strongly polynomial kjøretid, altså helt uavhengig av $U$. Ideen er veldig lite revolusjonerende, men analysen blir veldig bra. Vi velger isteden alltid den korteste augmenting pathen. Analysen på kjøretiden her går på å se på at hver kant kan kun bli saturert ($f(i,j) = u(i,j)$) $\mathcal{O}(n)$ ganger (dette gjøres ved å sette på distanse labels osv. osv., greit nok bevis), og videre siden det kun eksisterer $m$ kanter får vi at vi må finne $\mathcal{O}(mn)$ slike paths. Korteste vei kan finnes i $\mathcal{O}(m)$ tid (ikke trivielt!), så totalt får vi da en kjøretid på $\mathcal{O}(m^2n)$.
+
 
 
 \end{document}
