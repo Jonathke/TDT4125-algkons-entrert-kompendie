@@ -466,4 +466,67 @@ Vi har en forbedrert versjon av push-relabel kalt highest label push-relabel, so
 
 Vi har også små forbedringer, som ikke forbedrer den teoretiske kjøretiden, men som fremdeles kan bety mye for den praktiske kjøretiden. Det første er at vi tidlig kan finne $|f|$ uten å vite $f$ ($f$ betegner her den maksimale flyten). Den baserer seg på å redefinere aktive noder til kun å være aktive hvis de også har $d(i) < n$. Dette gir $|f|$ på grunn av et resultat som sier at "om vi terminererer push-relabel algoritmen når $e_f(i) > 0$ impliserer $d(i) \geq n, i \neq t$, da er settet $S$ av noder som ikke kan nå $t$ i $A_f$ et min s-t cut". Se detaljer i boka/forelesning. Et annet raskt triks da er "gap relabeling", som sier at om det opstår et gap i distance labelsene, typ en $k < max_i(d(i))$, så setter vi $d(j) = n, \forall j:k < d(j) < n$. Et siste triks som eksperimentelt har vist seg å være lurt å gjøre av og til (ca. hver $n$ relabel) er å regne faktisk distanse til $t$ for alle noder, og relable $d(i)$ til den korrekte distansen.
 
+\newpage
+\section{Multiflyt og Multiplikativ Vektoppdatering (MVO)}
+Multiflyt er en naturlig vei videre fra flyt, men som viser seg å være betydelig vanskeligere. Mer spesifikt mister vi mange av de kjære egenskapene som integralitet (heltallsegenskapen) og maks flyt min kutt. Multiflyt problemet er formulert som følger: Vi har en rettet graf $G=(V,A)$ med kapasiteter $u(i,j)$, samt $K$ kilde-sluk par $s_1 - t_1, ..., s_k - t_k$. Disse kan være overlappende (f.eks $s_i = t_j$). I noen tilfeller har vi også $K$ demands til de $K$ flytene notert som $d_1,...,d_k$. Målet er da å finne $K$ flyter $f_1,...f_k$ slik at $\sum\limits_{k=1}^{K}f_k(i,j) \leq u(i,j), \forall (i,j) \in A$ (kravet for hver av flytene hver for seg er det samme som tidligere). Målet kan være forskjellig, f.eks finne maks total flyt, eller bare oppnå $|f_k| \geq d_k, \forall k$.
+
+\subsection{LP formulering}
+En naturlig (og helt valid) LP formulering av multiflyt problemet er som følger:
+
+
+\begin{equation*}\label{multiflow1}
+\begin{array}{ll@{}ll}
+\text{Maximize: }  \displaystyle\sum\limits_{k=1}^{K}(\displaystyle\sum\limits_{j:(s_k,j) \in A}f_k(s_k,j) - &\displaystyle\sum\limits_{j:(j,s_k) \in A}f_k(j,s_k))\\
+\text{subject to:}\displaystyle\sum\limits_{j:j,i)\in A} f_k(j,i) - &\displaystyle\sum\limits_{j:i,j)\in A} f_k(i,j) &= 0, & K = 1,...,K, i\neq s_k,t_k\\
+&f_k(i,j) &\geq 0, & K = 1,...,K, (i,j)\in A\\
+&\displaystyle\sum\limits_{k=1}^{K} f_k(i,j) &\leq u(i,j) &\forall (i,j) \in A
+\end{array}
+\end{equation*}
+
+Men vi ønsker å se på en annen formulering også, blandt annet for Garg-Könemann algoritmen (se siste seksjon i dette kapitellet). Her har vi en notasjon $\mathcal{P}_k$ som betegner settet av alle $s_k - t_k$ paths i $G$. Videre har vi $\mathcal{P} = \cup_k \mathcal{P}_k$. Da vet vi fra tidligere kapitler at en flyt $f_k$ kan dekomponeres til flyter langs $P \in \mathcal{P}_k$. Vekten av denne flyten skriver vi som $x(P)$. Da får vi:
+
+\begin{equation*}\label{multiflow2}
+\begin{array}{ll@{}ll}
+\text{Maximize: }  \displaystyle\sum\limits_{P \in \mathcal{P}}&x(P)\\
+\text{subject to:}\displaystyle\sum\limits_{P: (i,j) \in P}&x(P)&\leq u(i,j), &\forall (i,j) \in A \\
+&x(P) &\geq 0, & \forall P \in \mathcal{P}
+\end{array}
+\end{equation*}
+
+Og tar vi dualen her får vi:
+
+\begin{equation*}\label{multiflow2Dual}
+\begin{array}{ll@{}ll}
+\text{Minimize: }  \displaystyle\sum\limits_{(i,j) \in A}u(i,j)&l(i,j)\\
+\text{subject to:}\displaystyle\sum\limits_{(i,j) \in P}&l(i,j)&\geq 1, &\forall P \in \mathcal{P} \\
+&l(i,j) &\geq 0, & \forall (i,j) \in A
+\end{array}
+\end{equation*}
+
+Her kan variablen $l(i,j)$ tolkes som lengden på kanten $(i,j)$. Da sier dualen at lengeen på hver path $P$ må være lengre enn 1, men samtidig at vi ønsker å minimere lengden på paths som har mye kapasitet. Dette er som nevnt nyttig for forståelsen av Garg-Könemann algoritmen.
+
+\subsection{Cut conditions, og $K=2$}
+Vi skulle gjerne brukt kutt til å avgjøre om vi kan møte demands, men som nevnt bryter maks flyt min kutt teoremet sammen for multiflyt. Ignorerer vi det et øyeblikk, kunne vi gjerne ha formulert en cut condition som $\sum\nolimits_{k:s_k \in S, t_k \notin S} d_k \leq u(\delta^+(S)), \forall S \subseteq V$ (Om det ikke er nevnt tidligere betyr $\delta^+(S)$ de utgående kantene av s-t kuttet $S$). For $K=1$ er det naturlig at dette impliserer at vi kan møte demands, pga. maks flyt min kutt teoremet. Men, det viser seg at med en slight modifikasjon kan vi faktisk brukte dette i $K=2$ og (enkle eksempler på hvorfor det ikke fungerer direkte kan konstrueres på lett).
+
+Det første vi må gjøre er å sette opp skew symmetry igjen. Men denne gangen setter vi og $u(i,j) = u(j,i), \forall (i,j) \in A$. For å hindre at skew symmtery gjør at to flows kan utligne hverandre setter vi nå opp capacity constraint som $\sum\nolimits_{k=1}^{K}|f_k(i,j)| \leq u(i,j)$. På grunn av skew symmetry og absoluttverdier påvirker nå $u(\delta^+(S))$ både s-t kutt og "t-s kutt", så vi må endre slightly på cut conditionen vår og får isteden kravet $\sum\nolimits_{k:|S \cap \{s_k, t_k\} = 1|} d_k \leq u(\delta^+(S))$. Og det viser seg at om $K=2$ så er denne cut conditionen nok til å garantere at $|f_k| \geq d_k, \forall k$. Faktisk gir det også et resultat til om at dersom alle kapasiterer $u(i,j)$ er heltall har vi halv-integralitet, dvs. at for alle flyter $f_k$ har vi $2|f_k| \in \mathbb{Z}$. Dette følger direkte fra beviset om at denne cut-conditionen er nok. Beviset er litt mye å skrive opp, men det går på å definere to nye grafer med en super-kilde $s$ kobla til hver av $s_1,s_2$, og et super-sluk $t$ koble til $t_1,t_2$. Deretter antar man at denne cut conditionen holder, også ser man at flytene klarer demandene $d_1,d_2$.
+
+\subsection{Multiplikativ Vektsoppdatering (MVO) og Packing Problems}
+Dette problemet formulert som følger: Vi har $T$ tidssteg, og for hvert steg $t = 1,...,T$, velg en av $N$ forskjellige verdier. For alle $i \in \{1,..,N\}$ verdiene og $t \in \{1,..,T\}$ har vi verdier $v_t(i) \in [0,1]$. Problemet er at vi ved tid $t$ kun vet de verdiene fra tidssteg $0,...,t-1$. Målet er å velge best mulig hele veien, og med MVO får vi et resultat som er nesten like bra som å velge en den beste fixed $j \in \{1,..,N\}$, dvs. $max_j \sum\nolimits_{t=1}^{T}v_t(j)$.
+
+Algoritmen fungerer ved å ha et set vekter $w(i)$ for hver $i$, som oppdateres under hvert tidssteg ($w_1(i) = 1, \forall i)$. Ved hvert tidssteg $t$ velger vi $i$ med sansynlighet $p_t(i)=\frac{w_t(i)}{W_t}$ der $W_t = \sum\nolimits_{i=1}^{N}w_t(i)$. Etter et valg er tatt får vi vite alle $v_t(i)$, så vi oppdaterervektene $w_{t+1}(i)=w_t(i)(1 + \epsilon v_t(i), \forall i$. Enkel sannsynlighet gir da at forventningsverdien til det algoritmen returnerer blir $\sum\nolimits_{t=1}^{T}\sum\nolimits_{i=1}^{N}v_t(i)p_t(i)$. 
+
+Vi får et resultat som sier at $\sum\nolimits_{t=1}^{T}\sum\nolimits_{i=1}^{N}v_t(i)p_t(i) \geq (1-\epsilon)\sum\nolimits_{t=1}^{T}v_t(j)-\frac{1}{\epsilon}ln(N)$ for $\epsilon \leq \frac{1}{2}$. Dette finner vi ved å finne øvre å nedre grenser for det første uttrykket, og så triske litt med ligningene. Ikke spesielt vanskelig å forstå, men ganske mye å skrive, så se evt. boka/forelesning. Det sentrale å merke seg er at denne grensen bryr seg ikke om fordelinger eller den slags. Dermed holder denne grense selv om vi velger verdier "adversarily".
+
+Denne algoritmen kan brukes til mye, blandt annet multiflyt. Men før vi ser på det ser vi på et annet eksempel litt raskt, kalt et "Packing Problem" Kort sagt har vi et system ulikheter der vi ønsker å finne løsninger som er så riktig som mulig. Litt mer formelt har vi et system
+\begin{equation}
+    Mx \leq e, x \in \mathcal{Q}
+\end{equation}
+Der $M$ betegner en $m x n$ matrise, $e$ er en vektor med kun enere, og $\mathcal{Q}$ er et conveks set. Videre har vi $Mx \geq 0, \forall x \in \mathcal{Q}$. Tror ikke det er nødvendig å gå inn i for mye detalj her, men ideen er at vi indekserer $x_i \in \mathcal{Q}$, og oppretter en $p_t$ vektor i hvert steg som består av sansynligheter $p_t(i)$. Vi finner så en $x_t \in \mathcal{Q}$ slik at $p_t^TMx_t \leq p_t^Te$, og oppdaterer vektene $w_{t+1}(j)$ slik at de radene $j$ som bryter restriksjonen $M_jx \leq 1$ for mer vekt. Til slutt returnerer vi $x* = \frac{1}{T}\sum\nolimits_{t=1}^{T}x_t$ (legg merke til at det er her vi bruker at $\mathcal{Q}$ er konveks). Ved å sette $T = \frac{\rho}{\epsilon^2}$, der $\rho = max_i,x(M_ix)$, eller den øvre grensen for hvor mye vi kan klare å bryter en restriksjon, får vi et resultat som sier at for $\epsilon \leq \frac{1}{2}$, finner algoritmen en løsning $x*\in \mathcal{Q}$, slik at $Mx* \leq (1+4\epsilon)e$, med kjøretid på $\mathcal{O}(\frac{m\rho}{\epsilon^2}ln(m))$, pluss $\mathcal{O}(\frac{\rho}{\epsilon^2}ln(m))$ matriseprodukt utregninger og $\mathcal{O}(\frac{\rho}{\epsilon^2}ln(m))$ søk etter $x_t \in \mathcal{Q}$. Se boka for detaljer/bevis.
+
+\subsection{Garg-Könemann algoritmen}
+Denne algoritmen baserer seg på MVO, samt LP formuleringen nevnt på starten av kapitellet. Idéen baserer seg på å bruke en vektsoppdatering som gjør at de kantene som har høy "congestion" (dvs. mye flyt i forhold til kapasitet), får mindre sjanse for å bli valgt i hver iterasjon. Den initialiseres med $x(P) = 0, \forall P \in \mathcal{P}$, dvs. ingen flyt, samt vekter $w(i,j)=1, \forall (i,j) \in A$. Så finner den i hver iterasjon den korteste $P \in \mathcal{P}$, der lengden på hver ark $l(i,j) = \frac{w(i,j)}{u(i,j)}$. Deretter øker den flyten langs denne med $u = min(u(i,j))$ langs $P$. Legg her merke til at dette kan naturlig nok overskrive capacity constraints (vi brukte $u(i,j)$, ikke $u_f(i,j)$). Dette øker både $x(P)$ og $f(i,j), \forall(i,j) \in P$ med $u$. deretter oppdateres vekter til $w(i,j)(1 + \epsilon\frac{u}{u(i,j)}, \forall (i,j) \in P$ (altså øker den også kun vekten til de kantene langs pathen vi nettopp økte flyten. Dette gjøres til det finnes en kant slik at $\frac{f(i,j)}{u(i,j)} < \frac{ln(m)}{e^2}$ Løsningen vår $x'$ er nå åpenbart ikke basert på en gyldig flyt, men merk at det kun er capacity constraints som er brutt. Dermed trenger vi bare å skalerere løsningen vår ned. Mer formelt finner vi $C = max(\frac{f(i,j)}{u(i,j)}$, og returnerer $x = \frac{x'}{C}$. 
+
+Resultatet er vi får er at Garg-Könemann løser multiflyt som en$(1+2\epsilon)$-approksimasjon. UTFYLL NÅR DU FÅR SVAR FRA MR. STUDASS.
+
+
 \end{document}
