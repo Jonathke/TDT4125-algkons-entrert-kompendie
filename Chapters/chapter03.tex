@@ -1,0 +1,30 @@
+\section{Den ungarske metoden} \label{ungarn}
+Denne algoritmen er et praktisk eksempel (historisk sett forløperen) til Primal-Dual metoden, som det står om i kapittel 5. Jeg går veldig raskt igjennom dette kapittelet, siden det er veldig greit om en har kontroll på Primal-Dual metoden. Den løser som nevnt tidligere vektet bipartitt matching.  Den har og en matrise-versjon som ikke er del av pensum, men ganske enkel å utføre. Videre ser vi på graf versjonen. Vi har en bipartitt graf $G=(U\cup V,E)$. Vi starter med å sette opp lineærprogrammet vårt:
+
+\begin{equation*}\label{maxindependentset}
+\begin{array}{ll@{}ll}
+\text{Maximize: }  & \displaystyle\sum\limits_{j \in E} c_j&x_j&\\
+\text{subject to:}& \displaystyle\sum\limits_{j:i \in j}&x_j = 1, &\forall i \in U\cup V\\
+&&x_j \geq 0&\forall j \in E
+\end{array}
+\end{equation*}
+
+Restriksjonen her kan tolkes som at summen av kanter tilkoblet node $i$ må være nøyaktig $1$. Med andre ord er det kun perfekte matchinger som er tillat. Videre er den sentrale idéen i algoritmen basert på å betrakte dualen, så vi setter opp den og:
+
+\begin{equation*}\label{maxindependentset}
+\begin{array}{ll@{}ll}
+\text{Minimize: }  & \displaystyle\sum\limits_{v \in U\cup V} &y_v&\\
+\text{subject to:}& &y_u + y_v \geq c_j, &u,v : j = (u,v), \forall j \in E\\
+&&y_v \geq 0&\forall v \in U \cup V
+\end{array}
+\end{equation*}
+
+Dualvariabler kan tolkes prislapper på nodene, der prisen på to nodepar som har en kant mellom seg må overskride prisen av kanten. Dette gir opphav til en ny graf basert på $G$ kalt likhetsgrafen basert på disse såkalte nodeveingene. I likhetsgrafen tar vi kun med de kantene der dualrestriksjonen er stram (der nodeveingen er lik kantvekten).
+
+\subsection{Prinsippet Bak Algoritmen}
+Idéen er at vi ønsker å oppnå komplimentær slakkhet (som vi har sett betyr det at vi oppnår optimum). Derfor får vi kun lov til å skru på $x_j$ dersom dualrestriksjonen for kant $j$ er stram, altså om $y_u + y_v = c_j$. Dermed bygger vi matchingen på en måte som gjør at dersom vi oppnår en gyldig løsning for primalen vil den oppfylle komplimentær slakkhet, og dermed være optimal. For å se at dersom vi har komplimentær slakkhet har også likhetsgrafen en perfekt matching, anta at den ikke har det. Da har vi et subset $S \subseteq U$ med $|S| > |N(S)|$ (fra Halls teorem). Det vi ønsker å gjøre nå er å senke alle $y_v$ for $v \in S$ mest mulig. La $\epsilon = min\{y_u+y_v-j : u \in S, v \notin N(S)\}$ Vi kan nå sette $y_u = y_u - \epsilon, \forall u \in S$ og $y_v = y_v + \epsilon, \forall v \in N(S)$. Dette kan vi åpenbart gjøre uten å bryte noen dualrestriksjoner (se på hvordan $\epsilon$ er konstruert), men det leder også til en bedre dual. Dette er en kontradiksjon (det bryter med svak dualitet), siden vi antok at vi hadde komplimentær slakkhet. Dermed må det være slik at $|S| \leq |N(S)|, \forall S \subseteq U$ i likhetsgrafen, og vi vet at likhetsgrafen har en perfekt matching.
+
+\subsection{Algoritmen}
+Analysen av hvorfor komplimentær slakkhet leder til en perfekt matching blir også utgangspunktet for algoritmen. Vi starter med å lage en vilkårlig lovlig dual (typisk settes $y_u = max\{c_j : u \in j\}, \forall u \in U$, mens vi setter $y_v = 0, \forall v \in V$). Deretter finner vi en ikke utvidbar (maksimum) matching i likhetsgrafen. Dersom den ikke er perfekt, finn en $S \subseteq U$ der $|S| > |N(S)|$ (typisk ved å traversere fra en ikke matchet node). Deretter gjør som i forrige avsnitt, og sett $y_u = y_u - \epsilon, \forall u \in S$ og $y_v = y_v + \epsilon, \forall v \in N(S)$. Vi får nå (minst) en ny kant i likhetsgrafen (merk, kanter kan forsvinne og), og vi kan dermed gå tilbake til å finne ikke-utvidbare matchinger, og vi gjør dette i hver iterasjon til vi finner en perfekt matching. Som nevnt vil da denne være den maksimale perfekte matchingen i $G$ på grunn av komplimentær slakkhet.
+
+For detaljer, se forelsning / boka. Det viktige her er den generelle idéen bak algoritmen. For en generalisering av denne idéen, se kapittel 5.

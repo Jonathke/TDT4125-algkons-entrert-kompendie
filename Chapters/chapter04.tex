@@ -1,0 +1,72 @@
+\section{Approksimasjon}
+\label{sec:approx}
+
+
+Approksimasjonsalgoritmer er algoritmer for å løse optimaliseringsproblemer. Konseptet som introduseres er litt løst basert på følgende utsagn: For å løse optimaliseringsproblemer trenger man 1) Optimal løsning, 2) I rask tid, 3) for alle problemer. Velg 2. Approksimeringsalgoritmer slacker på kravet om optimal løsning, ved å heller gi et svar som er så nært som mulig optimalt, men ikke nødvendigvis optimalt.
+
+For å få noe av verdi må vi kunne si noe om hvor nære approksimasjonen er, eller approksimasjonsgraden. La APX og OPT være hhv. approksimasjonen og den optimale løsningen. Da sier vi at algoritmen er en $\alpha$-approksimasjon dersom.
+
+\begin{align} \label{eq_01}
+	&APX \geq \frac{1}{\alpha}OPT \text{ For maksimeringsproblemer}\\ 		
+	&\frac{1}{\alpha}APX \leq OPT \text{ For minimeringsproblemer}
+\end{align}
+
+Et viktig konsept som går igjen er PTAS vs FPTAS. Definisjonen på en PTAS er en familie med approksimeringsalgoritmer $\{A_\epsilon\}_{\epsilon>0}$, der alle $A \in \{A_\epsilon\}_{\epsilon>0}$ er ($1 + \epsilon$)-approksimasjoner, med polynomisk kjøretid i n. En FPTAS er en PTAS der kjøretiden også er polynomisk i $\frac{1}{\epsilon}$. For å illustrere forskjellen oppfyller $O(n^{\frac{1}{\epsilon}})$ kun kravet til PTAS, mens $O(n^c + (\frac{1}{\epsilon})^d)$ oppfyller kravet til FPTAS også.
+
+\subsection{Maximum Independent Set/Største Uavhengige Set}
+For en graf $G = (V,E)$, kalles en $I\subseteq V$ independent/Uavhengig dersom ingen to noder i $I$ er koblet sammen.
+
+Å finne det største kan skrives som et lineærprogram på følgende måte
+
+\begin{equation*}\label{maxindependentset}
+\begin{array}{ll@{}ll}
+\text{Maximize: }  & \displaystyle\sum\nolimits_{v\in V} &x_v &\\
+\text{subject to:}&x_u + &x_c \geq 1,  &\text{ for alle kanter $(u,v)\in E$}\\
+                 &                                                &x_v \in \{0,1\}, &\text{ for alle noder $v\in V$}
+\end{array}
+\end{equation*}
+
+Dette er hovedsaklig tatt med som et eksempel på problemer som ikke kan approksimeres (Ikke 100\% sikker på dette, men tror det er et teorem om at det ikke finnes noen PTAS for største uavhengige sett, med mindre $P = NP$). Det samme gjelder for Maksimum Clique problemet (Hvordan disse problemene er relatert overlater jeg til leseren).
+
+\subsection{Set Cover/Mengdedekke}
+Mengdedekke er et veldig generelt problem, formulert som følgende: For et grunsett $E = \{e_1,e_1,...,e_m\}$ har vi flere subset $S_1, S_2,...,S_n$ der $S_i\subseteq E$, samt en tilknyttet vekt $w_i$ for hver $S_i$. Målet er å finne den sammensetningen av subset som dekker hele grunsettet med lavest vekt. Dersom $w_i=1, \forall i \in \{1,..,n\}$ har vi et \emph{uvektet} mengdedekke problem. Formulert som et lineær program har vi altså følgende:
+
+\begin{equation*}\label{maxindependentset}
+\begin{array}{ll@{}ll}
+\text{Minimize: }  & \displaystyle\sum\limits_{i = 1}^{n} &w_ix_i &\\
+\text{subject to:}&\displaystyle\sum\nolimits_{j:e \in S_j} &x_j \geq 1,  &\text{ for alle $e\in E$}\\
+                 &                                                &x_i \in \{0,1\}, & i \in \{1,...,n\}
+\end{array}
+\end{equation*}
+
+F.eks. er da et nodedekke et spesialtilfelle av mengdedekke. For å redusere fra en generell instans av et nodedekke til mengdedekke, la grunsettet være alle kanter. For hver node, lag et subset med alle tilkoblede kanter (slik at $n=|V|$), og la $w_i = v_i$. 
+
+I øving 2 er det et annet eksempel der mengdedekke reduseres til \emph{uncapacitated facility problem} og motsatt.
+
+\subsubsection{Approksimering ved avrunding}\label{{sec:approksavrunding}}
+Den første taktikken for å approksimere mengdedekke er å approksimere ved avrunding. Det fungerer ved først å løse slakkingen til lineærprogrammet, finne $f = \text{max}(|\{j:e\in S_j\}|)$, og deretter runde alle $x_i \geq \frac{1}{f}$ opp til $1$, og sette resten til $0$. Dette gir en $f$-approksimering. En intuitiv tolkning av f her er maksimalt antal subset et element opptrer i. Det er tydelig at dette fremdeles er en gyldig løsning til lineærprogrammet, ettersom $\sum\nolimits_{j:e \in S_j} x_j \geq 1$ i den optimale løsningen (siden summen ikke har mer enn $f$ ledd må minst et av dem være mer enn $\frac{1}{f}$).
+
+Dette er grunnen til at relaksering med avrunding løser nodedekke som en $2$-approksimasjon. Hver kant (hvert element) er intil nøyaktig to noder (del av to subset). Dermed har vi $f=2$.
+
+
+\subsubsection{Approksimering ved dualbasert avrunding}
+Dualen til (LP relakseringen av) lineærprogrammet til mengdedekket ser ut som følger:
+
+\begin{equation*}\label{DUALsetCover}
+\begin{array}{ll@{}ll}
+\text{Maximize: }  & \displaystyle\sum\limits_{i = 1}^{n} &y_i &\\
+\text{subject to:}&\displaystyle\sum\limits_{i : e_i \in S_j} &y_i \leq w_j,  &\text{ for alle $j\in \{1,...,n\}$}\\
+                 &                                                &y_i \geq 0 &\text{ for alle $i\in \{1,...,n\}$}
+\end{array}
+\end{equation*}
+
+Husk: I primalen hadde vi 1 restriksjon pr. element. Dvs. at hver $y_i$ tilsvarer en restriksjon, eller et element. I tillegg har vi i dualen en restriksjon pr. delmengde i primalen. Den intuitive moten å forstå dualen på kan være at hvert element har en pris. Denne prisen til et sett (summen av prisen til alle elemntene i settet) kan ikke overskride vekten av settet. Målet er da å maksimere prisene $y_i$.
+
+Ideen er nå å bruke noe av konseptet bak komplimentær slakkhet, samt den optimale løsningen til dualen for å konstruere en god approksimasjon til primalen. Vi gjør det på følgende måte: Løser dualen og får $\boldsymbol{y^*_i}$. Deretter løser vi primalen ved å velge alle de $S_j$ som er slik at $\sum\nolimits_{i:e_i \in S_j}\boldsymbol{y^*_i} = w_j$, dvs der dualrestriksjonen er stram. Dette fungerer ettersom hvis det skulle ha fantes et element som ikke var dekket, ville det betydd restriksjonen ikke var stram for noen av mengdene som elementet var del av. Dermed er løsningen heller ikke optimal siden vi kunne uten problem økt prisen på elementet.
+
+Hva får vi fra dette? Jo, det blir en ny $f$-approksimasjon, f samme som i forrige seksjon. Det er hovedsaklig to ting som er sentrale for å se dette. For det første, siden $DUAL \leq OPT$, har vi at $\sum\limits_{i=1}^{n}y_i \leq OPT$. Videre er $S_j$ kun med i løsningen dersom $\sum\nolimits_{i:e_i\in S_j}y_i = w_j$. Resten klarer du å sette sammen selv (eller se i boka...).
+
+\subsubsection{Approksimering ved grådighet}
+Den siste metoden for approksimering av mengdedekke er presentert som en grådig løsning (og her den suverent beste!). Dette er en $H_n$-approksimering ($H_n = \sum\limits_{k=1}^{n}\frac{1}{k}$, AKA. summen av de n første leddene i den harmoniske rekken), der $n=|V|$. Den er ganske enkel å forklare. Approksimasjonsgraden er litt mer å forklare. Algoritmen fungerer slik: Ved hvert steg, regn ut det settet som gir mest lavest stykkpris på udekte elementer, og legg til dette settet i løsningen. Itererer til alle elemter er dekket (maks n ganger). Litt mer formelt, la $I$ være den nåverende løsningen, og la $\hat{S_i} = S_i\setminus\{e\in I\}$. Ved hver iterasjon gjør $I = I \cup S_j : j = min_i(\frac{|S_i|}{w_i}), \forall i$. 
+
+For bevis av approksimasjonsgraden her, se boka, side 108.

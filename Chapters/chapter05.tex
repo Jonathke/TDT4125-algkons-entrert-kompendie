@@ -1,0 +1,66 @@
+\section{Primal-Dual Metoden}
+Dette er den generelle ungarske metode/dualbasert avrunding i mengdedekke metoden, og gir ofte opphav til gode approksimeringsalgoritmer. I tillegg er approksimeringsgraden ofte lett å analysere.
+
+Metoden er veldig generell, og går ut på å starte med en gyldig dual-løsning (ikke nødvendigvis opptimal), og så gradvis forbedre dualen samtidig som man bygger løsningen til primalen (ofte basert på komplimentær slakkhet). Analysen av løsningen går da ofte ut på at vi har komplimentær slakkhet en vei, mens en approksimert komplimentær slakkhet den andre veien. Det enkleste er nesten bare å se på eksempler, så vi kjører på.
+
+\subsection{Mengdedekke Revisited}
+Se over for en beskrivelse av mengdedekke. Primal-dual metoden for mengdedekke gir opphav for løsningen approksimering ved dualbasert avrunding, kun med en liten endring. I steden for å starte med å konstruere en optimal løsning til dualen $\boldsymbol{y^*_i}$, så starter vi heller med en gyldig løsning, f.eks $y_i = 0, \forall i$. Deretter gjør vi som i analysen av gyldigheten, og ser på et vilkårlig udekt element $e_i$. Siden elementet er udekt, betyr det at $\sum\nolimits_{k:e_k\in S_j}y_k < w_j,\forall j:e_i \in S_j$, og dermed kan vi øke $y_i$ med en $\epsilon > 0$, slik at minst én dualrestriksjon blir stram. Da legger vi til $S_j$ i løsningen for alle $j : \sum\nolimits_{k:e_k\in S_j}y_k = w_j$, altså der dualrestriksjonen er stram. Slik kan vi bygge løsningen vår med maks $n = \text{antall elementer}$ iterasjoner.
+
+Her ser vi at komplimentær slakkhet åpenbart er oppfylt den ene veien, siden vi valgte å sette $x_j = 1 \iff \sum\nolimits_{k:e_k\in S_j}y_k = w_j$. For alle andre har vi $x_k = 0$. Andre veien derimot har vi kun approksimert komplimentær slakkhet. Dette fordi at for en $y_i > 0$ så vil $\sum\nolimits_{j : y_i \in S_j}x_j \leq f$, der $f$ er som tidligere (maks antall ganger et element opptrer i forskjellige set). Dermed er det også lett og se at dette blir en $f$-approksimasjon.
+
+\subsection{Feedback Vertex Set/Sykelkritiske Noder}
+Dette problemet kan tolkes på flere måter. Personlig er den mest intuitive måten som følger: Vi har en urettet graf $G = (V,E)$, med tilhørene vekter $w_i$ til nodene. Vi ønsker å fjerne noder billigst mulig slik at $G$ blir asyklisk. Som et IP (der $\boldsymbol{C}$ betegner settet av sykler i $G$):
+
+\begin{equation*}\label{FeedbackVertices}
+\begin{array}{ll@{}ll}
+\text{Minimize: }  & \displaystyle\sum\nolimits_{i \in V} w_i&x_i &\\
+\text{subject to:}&\displaystyle\sum\nolimits_{i \in C} &x_i \geq 1,  &\forall C \in \boldsymbol{C}\\
+                 &                                                &x_i \in \{0,1\} &\forall i \in V
+\end{array}
+\end{equation*}
+
+Her er det viktig å se at $\boldsymbol{C}$ vokser eksponensielt med antall noder, så det blir mange restrikssjoner etterhvert. Tar vi relakseringen av IP formuleringen vår, og ser på dualen har vi
+
+\begin{equation*}\label{FeedbackVertices}
+\begin{array}{ll@{}ll}
+\text{Maximize: }  & \displaystyle\sum\limits_{C \in \boldsymbol{C}} &y_c &\\
+\text{subject to:}&\displaystyle\sum\limits_{C \in \boldsymbol{C}:i \in C} &y_c \leq w_i,  &\forall i \in V\\
+                 &                                                &y_c \geq 0 &\forall C \in \boldsymbol{C}
+\end{array}
+\end{equation*}
+
+Nå har vi naturlig nok eksponensielt mange dualvariabler (siden vi hadde eksponensielt mange primalrestriksjoner), men er ikke et stort problem, ettersom vi kun trenger å øke et polynisk antall av dem). Den naturlige måten å løse dette på er å forsøke nøyaktig samme strategi som i forrige seksjon, starte med gyldig dual, også øke den "nærmeste" $y_c$ slik at minst en restriksjon blir stram. Samme analyse som tidligere oppnår vi da følgende approksimasjonsgrad (her betegner $S$ løsningssettet):
+
+\begin{align} \label{eq_01}
+	&\sum\limits_{i \in S}w_i = \sum\limits_{i \in S}\sum\limits_{C:i\in C}y_c = \sum\limits_{C \in \boldsymbol{C}}|S\cap C|y_c
+\end{align}
+
+Her ser vi altså at vi får en approksimasjonsgrad på $max_{C}(|S\cap C|)$ (maks antall sykler en node i løsningen er med i). Dessverre vil samme naive "bare øk hvilken som helst dualvariabel" strategi som tidligere føre til at dette tallet kan bli veldig høyt. Men ved litt smartere valg av variabler vil vi kunne oppnå en ganske god approksimasjonsgrad.
+
+Løsningen er å i et hvert steg kun øke dualvariabler som tilhører sykler med mindre enn $2\lceil \log_2n\rceil$ noder av grad $3$ eller mer. Det er en del analyse bak dette, men her kommer en rask oppsummering: Vi fjerner alltid noder av grad $< 2$ siden disse umulig kan være del av en sykel. Stier av noder av grad $2$ vil utslettes ved å velge en vilkårlig node i stien (dette gjøres iteratit siden naboer da vil ha grad $< 2$). Dermed kan disse stiene slåes sammen til en kant. Deretter har vi et lemma som sier at i en graf uten noder av grad $1$ finnes det alltid en sykel med maks $2\lceil \log_2n\rceil$ noder av grad $3$ eller mer. Dette sees ved å se for seg et binærsøk gjennom grafen, der vi slår sammen stier av noder med grad $2$. Her vil entall noder minst doble seg per nivå gjennom treet, og vi kan ha maksimal dybde på $\lceil \log_2n\rceil$. Dermed (om det finnes minst en sykel), vil det finnes minst en sykel som også har lengde mindre enn $2\lceil \log_2n\rceil$ (se for deg at den knyttes sammen helt i bånn av treet).
+
+Denne strategien gir oss en $4\lceil \log_2n\rceil$-approksimasjon. For å se dette, se først at størrelsen på sykler som "legges til" (dualvariablen økes) i hvert trinn av algoritmen ikke overskrider $2\lceil \log_2n\rceil$, hvis vi kun teller noder av grad $> 2$. Teller vi bare disse nodene, så har vi $|S\cap C| \leq 2\lceil \log_2n\rceil$. Men, det kan også være stier med noder av grad $2$ i mellom hver av nodene. Uansett, fra disse stiene er maksimalt en node med (se forrige avsnitt). Dermed kan har vi $|S\cap C| \leq 4\lceil \log_2n\rceil$, og som tidligere argumentert for gir dette en øvre grense på approksimasjonsgraden.
+
+Dette er en viktig lekse i primal-dual algoritmen. Ofte ønsker vi å øke den "minste" (på et eller annet vis) dual-variabelen.
+
+\subsection{Korteste Vei}
+Mer av det samme som i forrige seksjon, det vanskeligste her er oppsettet. Hopper over det formelle, kan evt. se i boka. Her har vi primalvariabler som kanter som skal skrus av/på, mens dualvariablene er s-t kutt, dvs. $S = \{v \in V:s \in S, v \notin S\}$. Er egentlig ingen ny lekse her, men igjen øker vi alltid den $y_s$ som tilhører den "minste" $S \in \boldsymbol{S}$. Minste her betyr det subsettet av noder vi kan nå med løsningen vi har bygget til ved den nåværende iterasjonen, og øker til en av dualrestriksjonene blir stramme. Da tar vi med den kanten i løsningen. Tilslutt, når vi når $t$ så stripper vi vekk alt som ikke er del av s-t veien og returnerer løsningen $P$.
+
+Resultatet her blir da en velkjent algoritme, Dijkstra's algoritme, som finner den optimale løsningen. Dette sees ved standard primal-dual analyse, som gir oss at dette er en $max(|P\cap \delta (S)|)$-approksimasjon, der $\delta (S) = \{e = (u,v): u \in S, v \notin S \}$. Deretter kan man se at $|P\cap \delta (S)| = 1, \forall y_c \neq 0$, siden ellers ville vi på et punkt lagt til en sykel i løsningen vår. Dermed får vi en optimal løsning (det er jo velkjent at Dijkstra's returnerer den optimale løsningen, så dette burde vel ikke være noen bombe).
+
+\subsection{Minimum Knapsack Problem}
+Denne seksjoner viser et annet fenomen som kan være et hinder for approksimeringsalgoritmer. Problemet er som et slags motsatt knapsack-problem, der man ønsker å bære lavest mulig vekt, men der verdien av tingene er høyere enn en satt terskel. En naturlig formulering av IP-et gir:
+
+\begin{equation*}\label{FeedbackVertices}
+\begin{array}{ll@{}ll}
+\text{Minimize: }  & \displaystyle\sum\limits_{i \in I} s_i&x_i &\\
+\text{subject to:}&\displaystyle\sum\limits_{i \in I} v_i&x_i \geq D\\
+                 &                                                &x_i \in \{0,1\} &\forall i \in I
+\end{array}
+\end{equation*}
+
+Her er $s_i$ og $v_i$ hhv. vekten og verdien til objektet $i \in I$. Dette oppsettet gir opphav til et arbitrært dårlig "Integrality gap", eller heltallsavvik. Heltallsavvik er betegnelsen på den øvre grensen for et tall $\alpha$ slik at $\frac{OPT}{PRIM} \geq \alpha$ (for et minimeringsproblem). I primal-dual analysen er det helt klart nødvendig at dette tallet ikke er for høyt, ettersom det gjør at løsningen på relakseringen forteller oss lite om den faktiske løsningen. 
+
+I vårt nåværende oppsett kan man gi problemet $I = \{1,2\}$, hvor $v_1 = D-1, v_2 = D, s_1 = 0, s_2 = 1$. Her er det lett og se at heltallsløsningen er å kun ta med objekt $2$, og gir oss summen $1$, mens LP-relakseringen vil ta med objekt $1$, og fylle opp siste lille biten med en fraksjon av objekt $2$. Dette gir summen $\frac{1}{D}$, og gir oss heltallsavvik $\frac{OPT}{PRIM} = D$.
+
+Det er en annen lur måte å sette opp problemet på som unngår det skrekkelige heltallsavviket ved å bytte ut verdi-begrepet med "avstand" fra å fylle opp til kravet D, og gir opphav til en $2$-approksimering. Se boka (s. 127)/forelesning 5 for detaljer.

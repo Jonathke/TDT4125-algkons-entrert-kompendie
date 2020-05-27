@@ -1,0 +1,57 @@
+\section{Grådighet og Matroider}
+Når vi forsøker å abstrahere konseptet bak den grådige algoritmer, åpner det seg en hel ny verden, som har gitt opphave til et helt forskningsfelt, nemlig matroide-teori. For å forstå hva matroider i det hele tatt handler om starter vi med et såkalt \emph{Independent system}, eller uavhengig mengdesystem. Det består av mengde paret $(E,\boldsymbol{S})$, der $E$ er et ikke-tomt sett, og $\boldsymbol{S}\subseteq 2^E$ er lukket under inklusjon (for $A \in \boldsymbol{S} \text{ og } B \subseteq A \text{ har vi } B \in S)$. 
+
+Dersom vi ser på $M = (E,\boldsymbol{S})$, har vi følgende ekvivalente utsagn:
+\begin{itemize}
+  \item $M$ er en matroide
+  \item Et uavhengighetssystem med en submodulær rangfunksjon (se polymatroider)
+  
+  \item for alle $J,K \in \boldsymbol{S}$ med $|J| = |K| + 1$ har vi at det eksisterer en $a \in J\setminus K$, slik at $K \cup \{a\} \in \boldsymbol{S}$ 
+  \item For alle $A \subseteq E$, har alle maksimale uavhengige set i $A$ samme kardinalitet.
+  \item ...og mange fler
+\end{itemize}
+For beviser på ekvivalens se i boka (eller tenk litt, med utgangspunkt i at den grådige algoritmen alltid finner det globalt maksimale uavhengige settet i $M$). Merk at maksimale uavhengige set kalles også basiser.
+
+Stort sett når vi ser på matroider antar vi at det underliggende problemet er maksimering, og at vi kun ser på positive vekter. Dette er uten tap av generalitet, siden dersom vi har en vekt-funksjon $w$ med negative vekter, kan vi erstatte den med en annen vekt-funksjon $w'$ der $w' = w + c$, slik at alle vekter er positive. Dette blir naturlig nok samme optimale sett som løsning, ettersom alle maksimale sett er like store ($w'(A) = w(A) + |A|c, \forall A$). Videre, om vi har et minimeringsproblem med vektfunksjon $w_1$, kan vi naturlig nok se på maksimering over vektfunksjonen $w_1' = -w_1$.
+
+\subsection{Polymatroider og Submodularitet}
+I forelesning ble matroider egentlig introdusert som polymatroider der $x$ er binær. Jeg synes vel det var greiere å gå rett på matroider, men kan vel være verdifull innsikt for det. Polymatroider er igrunn de lineær-programmene som lar seg løse grådig. For å se hvilke egenskaper som da trengs, så må vi ha et bilde på en grådig algoritme for lineær-program. Det blir som følger: sorter først etter $c$ (som her betegner målfunksjonen) i synkende rekkefølge deretter øk alltid den mest verdifulle $x_j$ så mye som mulig. Så videre til kravene.
+
+Det enkleste er å se for seg et ligningsystem på nedre triangulær form. Dersom strategien for skal fungere, må $b_i \geq b_{i+1}$ (der $i$ betegner radene). Vi kan da løse dualen på samme måte, og oppnår komplimentær slakkhet (og dermed optimalitet). Men! dessverre så har vi jo ekstremt sjeldent et ligningsystem på en slik triangulær form, så vi må opprette et krav til for restriksjonen $\boldsymbol{b}$, slik at det ikke ødelegger for strategien vår i det generelle tilfelle. Dette kravet kalles submodularitet og er som følger:
+
+\begin{equation*}\label{maxindependentset}
+\begin{array}{ll@{}ll}
+b(a_i \cup a_j) + b(a_i \cap a_j) \leq b_i + b_j
+\end{array}
+\end{equation*}
+
+I forelesning 7 er det veldig godt og visuelt forklart hvorfor dette holder. Kort forklart fordi om vi ser for oss to restriksjoner $i,j$, så kan vi flytte kolonnene i lineær programmet slik at $a_i \cap a_j$ ligger først, deretter $a_i \setminus a_j$ og tilslutt $a_j \setminus a_i$. For at optimum må finnes grådig har vi at $a_j x \leq b_j$. Videre kan vi skrive $a_j x = ((a_i \cup a_j) - a_i + (a_i \cap a_j))x$. Dermed blir kravet $b(a_i \cup a_j) - b_i + b(a_i \cap a_j) \leq b_j$, som skrevet om blir submodularitetskravet.
+
+Et visuelt bilde på en polymatroide følger. Kort forklart og muligens litt forenklert former løsningsettet til en polymatroide en n-dimensjonal konveks polytop (n er størrelsen på lineærprogrammet i antall variabler), der optimum kan nåes ved kun å vandre langs en dimensjon (dvs. øke en variabel) av gangen! 
+Et par greie egenskaper å ta med: Dersom $\boldsymbol{b}$ er heltallig, har også polymatroiden heltallshjørner. Videre gjelder det samme for snittet av to polymatroider (dette snittet er såkalt TDI, \emph{totally dual integral}). Mer om snitt av matroider under.
+
+\subsection{Approksimering og Snitt Over Flere Matroider}
+Den grådige algoritmen løser som sagt matroider optimalt. Men hva skjer om vi forsøker å benytte den grådige algoritmen over et uavhengig system som ikke nødvendigvis er en matroide? Da ønsker vi å finne en approksimasjonsgrad. 
+
+Starten på å analysere en slik approksimasjonskrad er for en mengde $A \subseteq E$ å definere en øvre rang $ur(A)$ og en nedre rang $lr(A)$ som er definert lik kardinaliteten til henholdsvis største og minste basis (merk at for en matroide er da naturlig nok $ur(A) = lr(A), \forall A \subseteq E$. Denne kalles da bare en rang, notert ved $\rho(A)$). Dette gjør analysen av approksimasjonsgraden ganske grei. For et mengdesystem $M$, og en $A \subseteq E$, kan det være at den grådige algoritmen finner $lr(A)$, mens opt naturlig nok er $ur(A)$. For $M$ definerer vi rangkvtienten $rq(M) = min_A\{\frac{lr(A)}{ur(A)}\}$, og for et uvektet optimaliseringsproblem kan vi dermed få $\frac{APX}{OPT} \leq rq(M)$. Videre kan det vises ganske greit (den grådige algoritmen velger jo alltid de enkelt-elemntene med høyest mulig verdi osv., se boka/forelesning for et mer rigøst bevis) at for et mengdesystem vil vi også alltid ha $\frac{APX}{OPT} \geq rq(M)$.
+
+La oss se for et mengdesystem $M = (E,S)$, der $S = \cap_{i=1}^{k}S_i$, og der $M_i = (E,S_i)$ er matroider. Dette kalles maksimering over snittet av $k$ matroider. Det kan løses eksakt for $k=2$ i polynomisk tid, men er NP-hardt for $k \geq 3$. Men, vi kan naturlig nok bruke grådighet som approksimasjon. Som vi har sett, fungerer rangkvotienten som en god nedre grense for approksimasjonsgraden, og det kan vises at $rq(M) \geq \frac{1}{k}$. Akkurat dette beviset håper jeg ikke kommer på eksamen, men detaljer finnes i forelesning 7.
+
+\subsection{Eksempler}
+Denne seksjonen har vært ganske "der ute" så langt, men med litt praktiske tilfeller og mye teori i boks, kan vi se effekten av arbeidet her i denne seksjonen. Vi starter med å se på et par ganske generelle matroider (de som er sett på i pensum):
+
+\begin{itemize}
+  \item \textbf{Grafmatroiden:} $E$ er kanter i en urettet graf, $\boldsymbol{S}$ er sett av kanter uten sykler.
+  \item \textbf{Hale- og hodepartisjonsmatroider:} $E$ er kanter i en rettet graf, $\boldsymbol{S}$ er sett av kanter med ulike start- og sluttnoder.
+  \item \textbf{Vektormatroider:} $E$ er en mengde med vektorer, $\boldsymbol{S}$ er lineært uavhengige mengder (dette er den ikke-algoritmiske inngangen til matroideteori).
+  \item \textbf{Uniforme k-matroider:} $E$ er kanter i en mengde, $\boldsymbol{S}$ er delmengder opp til kardinalitet k.
+  \item \textbf{Transversalmatroider:} $E$ er venstrenoder i en bipartitt graf, $\boldsymbol{S}$ er sett av noder som kan matches samtidig.
+\end{itemize}
+Ettersom disse mengdesystemene er matroider, vet vi nå at alle disse maksimeringsproblemene kan løses optimalt med den grådige algoritmen (eksempelvis er den grådige algoritmen over grafmatroiden enkelt og greit Prim's algoritme med negativ vekt-funksjon). 
+
+Videre kan vi endelig forstå den fantastiske setningen fra seksjon 1! Snittet av to transversal-matroider er naturlig nok mere kjent som problemet matching i en bipartitt graf (en matroide for hver side av den bipartitte grafen). Dermed vet vi at den grådige algoritmen løser bipartitt matching med approksimasjonsgrad $\alpha = \frac{1}{2}$. Videre vet vi også at det kan løses eksakt i polynomisk tid, siden det er snittet over $k=2$ matroider. Ellers kan vi egentlig like lett finne approksimasjonsgraden til den grådige algoritmen for matching i generelle grafer. Ved å starte med å gi enhver kant i grafen en vilkårlig retning, ser vi at snittet av hale- og hodepartisjonsmatroider for grafen vil tilsvare matchinger i den original grafen. Dermed vet vi at den grådige algoritmen faktisk løser generelle matchinger med approksimasjonsgrad $\alpha = \frac{1}{2}$.
+
+Et annet eksempel er spenntrær i en rettet graf. Det kan modelleres som snittet av grafmatroiden og hode- ELLER halepartisjoner, og viser oss at dette problemet kan løses i polynomisk tid, selvom den grådige algoritmen ikke gir optimal løsning. Videre kan vi betrakte snittet av grafmatroiden og hode- OG halepartisjoner, og med litt tenking ser vi fort at de maksimale uavhengige mengdene her må tilsvare hamiltonstier. Dette viser at optimalisering over snittet av $k \geq 3$ matroier er NP-hardt, men at den grådige algoritmen løser det tilsvarende optimaliseringsproblemet med approksimasjonsgrad $\alpha = \frac{1}{3}$. Så mye approksimeringsteori! Og så mye enklere enn tidligere nå som vi kan anvende matroider! Fantastisk.
+
+\subsection{"Greedoids"}
+Helt til slutt kan det nevnes at kravet om inklusjon i uavhengige mengdesystemer faktisk er litt for strengt i forhold til hva som trengs for å kunne løse et optimaliseringsproblem med den grådige algoritmen. Dermed kan vi bytte ut det kravet heller med kravet at dersom $A \in \boldsymbol{S}$, så finnes det alltid en $e \in A \text{ slik at } A \setminus \{e\} \in \boldsymbol{S}$. Legg merke til at dette kravet, kalt tilgjengelighet, er mye mindre strengt enn kravet om inklusjon. Et slikt tilgjengelig system er en "greedoid" (en generalisering av matroide) hvis og bare hvis kravet for matroider i uavhengige mengdesystemer "for alle $J,K \in \boldsymbol{S}$ med $|J| = |K| + 1$ har vi at det eksisterer en $a \in J\setminus K$, slik at $K \cup \{a\} \in \boldsymbol{S}$" utvides til at også $J \setminus \{a\} \in \boldsymbol{S}$ (i uavhengige mengdesystemer var dette ikke et nødvendig krav, siden for alle $A \subseteq J \text{ hadde vi } A \in \boldsymbol{S}$). Legg også merke til at $\emptyset \in \boldsymbol{S}$ for alle tilgjengelige systemer så vel som alle uavhengige mengdesystemer.
