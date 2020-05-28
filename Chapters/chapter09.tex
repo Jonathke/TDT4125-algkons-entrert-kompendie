@@ -4,7 +4,7 @@ De forrige algoritmene brukte på et eller annet vis alle augmenting paths for �
 \subsection{Push-Relabel}
 Den algoritmen baserer seg på distance labels (så vidt nevnt i slutten av forrige seksjon), og såkalt preflyt. En preflyt har samme krav om capacity constraint samt skew symmetry fra flyt, men har et løsere krav enn flow conservation: nemlig at for alle $i \in V, i \neq s$ så har vi $\sum\nolimits_{k:(k,i)\in A}f(k,i) \geq 0$ (sagt med ord at det kommer mer flyt inn enn det går ut av hver node, husk vi har skew symmetry). Vi kaller denne mengden \emph{excess at $i$ for a preflow $f$}, og skriver $e_f(i)=\sum\nolimits_{k:(k,i)\in A}f(k,i)$. Legg også merke til at en flyt er og en gyldig preflyt.
 
-Videre ser vi på distance labels $d(i), \forall i \in V$. Disse representerer på et vi en nedre grense for distansen til sluket. En intuisjon som blir nyttig etterhvert er og at de representerer "høyden" til node i. Vi har en gyldig distance labeling om følgende krav er oppfylt:
+Videre setter vi på distance labels $d(i), \forall i \in V$. Disse representerer på et vis en nedre grense for distansen til sluket. En intuisjon som blir nyttig etterhvert er og at de representerer "høyden" til node i. Vi har en gyldig distance labeling om følgende krav er oppfylt:
 
 \begin{itemize}
   \item $d(s) = n$
@@ -12,13 +12,13 @@ Videre ser vi på distance labels $d(i), \forall i \in V$. Disse representerer p
   \item $d(i) \leq d(j) + 1, \forall (i,j) \in A_f \text{(residualgrafen)}$
 \end{itemize}
 
-Videre har vi at for en preflyt $f$ og en valid distance labeling $d$, finnes ingen augmenting paths i $G_f$. For å se dette, anta at det finnes en s-t path $P$ i $G_f$ (altså en augmenting path). P inneholder maks $n$ noder, og dermed maks $n-1$ kanter. Da får vi $d(s)=d(t) + |P| \leq 0 + n-1 = n-1$. Men $d(s)=n$, så dette er en kontradiksjon. 
+Videre har vi at for en preflyt $f$ og en valid distance labeling $d$, finnes ingen augmenting paths i $G_f$, der vi kun får gå over en kant der $d(i) = d(j) + 1$. For å se dette, anta at det finnes en s-t path $P$ i $G_f$ (altså en augmenting path). P inneholder maks $n$ noder, og dermed maks $n-1$ kanter. Da får vi $d(s)=d(t) + |P| \leq 0 + n-1 = n-1$. Men $d(s)=n$, så dette er en kontradiksjon. 
 
 Dette gir oss alt vi trenger for å outline push-relabel algoritmen. Vi starter med en valid distance labeling og en preflyt. Deretter forsøker vi gradvis å gjøre om preflyten til en flyt, mens vi holder distance labelingen valid. Dette resulterer da i en maks flyt på grunn av resultatet over.
 
 Litt mer spesifikt ønsker vi å dytte så mye \emph{excess at i} mot sluket, over de kantene som er på den \emph{tilsynelatende} korteste veien. Med det menes at vi kun dytter flyt over en kant $(i,j)$, dersom $d(i) = d(j) + 1$ (om dette og $u_f(i,j) > 0$ holder, kaller vi kanten admissable). Når vi dytter dytter vi alltid mest mulig, dvs. $min(e_f(i),u_f(i,j))$. Om vi ikke har noen admissable kanter for en node $i$ med $e_f(i) > 0$, da tolker vi det som at labelen er feil, og gjør en relabel. Mer spesifikt øker vi $d(i)$ til $d(i) = min_{j:(i,j) \in A_f}(d(j)+1)$, dvs. den laveste $j$ som $i$ har residual-flyt til. Merk at en slik $j$ alltid finnes, pga. skew symmetry kan vi alltids dytte flyt tilbake igjen. Her er $d(i)$ som høyde en god intuisjon, der flyt alltid går nedover.
 
-Om vi nå initialiserer push-relabel algoritmen vår som $d(s)=n, d(i)=0, i \neq s$, og setter $f(s,k) = u(s,k) \forall k$, så ser vi at algoritmen holder en gyldig preflyt og en valid distance labeling hele veien. Dette er ikke vanskelig å se, se evt. boka/forelesning. Det er og lett å se at når algoritmen stopper (da $e_f(i) = 0, \forall i \neq s$) har vi en flyt, og som argumentert for tidligere er den maksimal.
+Om vi nå initialiserer push-relabel algoritmen vår som $d(s)=n, d(i)=0, i \neq s$, og setter $f(s,k) = u(s,k), \forall k$, så ser vi at algoritmen holder en gyldig preflyt og en valid distance labeling hele veien. Dette er ikke vanskelig å se, se evt. boka/forelesning. Det er og lett å se at når algoritmen stopper (da $e_f(i) = 0, \forall i \neq s$) har vi en flyt, og som argumentert for tidligere er den maksimal.
 
 \subsection{Kjøretid}
 Analysen av kjøretiden baserer seg hovedsaklig på to resultater. Den ene sier at for enhver preflyt $f$, for en node $i, e_f(i) > 0$, så finnes det alltid en path fra i til s i $G_f$. Det andre resultatet er at for en node $i$ har vi $d(i) \leq 2n-1$. Dette fordi at for at vi skal relable så må $e_f(i) > 0$, og da finnes det en path $P$ til $s$. Dette gir at $d(i) \leq d(s) + |P| \leq 2n - 1$.
