@@ -36,7 +36,7 @@ Dette problemet er tilsvarende "Sykelkritiske noder" som tidligere omtalt, borts
 
 \begin{itemize}
     \item \textbf{FAST.1:} Dersom en kant $e$ er del av minst $k+1$ triangler, lager vi en ny instans av problemet $(T,k-1)$ der $T = (V,E\setminus \{e\})$
-    \item \textbf{FAST.2:} Dersom en kant $v$ ikke er del av noe triangel, lag en ny instans $(T,k)$ der $T = (V\setminus \{v\},E')$ hvor $E'$ er de kantene som er igjen når vi "shortcutter" $v$.
+    \item \textbf{FAST.2:} Dersom en kant $v$ ikke er del av noe triangel, lag en ny instans $(T,k)$ der $T = (V\setminus \{v\},E')$ hvor $E'$ er de kantene som er igjen når vi fjerner de som har $v$ som endepunkt.
 \end{itemize}
 Merk at i analysen i boka snur de kanter fremfor å fjærne dem. Det at FAST.2 er "safe" er ikke trivielt, se evt. boka for bevis. Videre gir analysen vår at FEEDBACK ARC SET IN TURNAMENTS har en \emph{kernel} bestående av maksimalt $k^2 + 2k$ noder.
 
